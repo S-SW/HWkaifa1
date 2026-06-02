@@ -3,6 +3,13 @@
     "pages/splash",
     "pages/Index",
     "pages/home",
-    "pages/login"
+    "pages/login",
+    "pages/cart",
+    "pages/order",
+    "pages/orderDetail",
+    "pages/mine",
+    "pages/address",
+    "pages/addressEdit",
+    "pages/personalInfo"
   ]
 }

@@ -51,7 +51,7 @@ struct Splash {
 
     setTimeout(() => {
       router.replaceUrl({
-        url: 'pages/login'
+        url: 'pages/home'
       });
     }, 500);
   }
