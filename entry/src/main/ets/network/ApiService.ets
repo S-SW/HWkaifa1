@@ -4,7 +4,7 @@ import { Dish, CartItem, Order, User, Address, Banner } from '../model/Entities'
 // 确保引入了你用来存取 Token 的 AppStorage 工具类
 import AppStorage from '../utils/AppStorage';
 
-const BASE_URL = 'http://10.13.30.132:8080';
+const BASE_URL = 'http://10.60.62.39:8080';
 const TIMEOUT = 30000;
 const TAG = 'ApiService';
 
