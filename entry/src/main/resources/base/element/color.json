@@ -2,15 +2,15 @@
   "color": [
     {
       "name": "primary",
-      "value": "#FF7A2F"
+      "value": "#4A90E2"
     },
     {
       "name": "primary_light",
-      "value": "#FFF2E8"
+      "value": "#EBF3FC"
     },
     {
       "name": "primary_dark",
-      "value": "#E66A20"
+      "value": "#2B6CB0"
     },
     {
       "name": "success",
@@ -54,11 +54,11 @@
     },
     {
       "name": "color_primary",
-      "value": "#FF6B35"
+      "value": "#4A90E2"
     },
     {
       "name": "color_secondary",
-      "value": "#FF9800"
+      "value": "#63B3ED"
     },
     {
       "name": "color_background",

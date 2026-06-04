@@ -37,7 +37,7 @@ struct Mine {
     }
     .width('100%')
     .height('100%')
-    .backgroundColor('#F5F5F5')
+    .backgroundColor('#ffc2faf5')
   }
 
   @Builder

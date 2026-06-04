@@ -2,7 +2,7 @@ import http from '@ohos.net.http';
 import hilog from '@ohos.hilog';
 import { Dish, CartItem, Order, User, Address, Banner } from '../model/Entities';
 
-const BASE_URL = 'http://10.206.121.39:8080';
+const BASE_URL = 'http://10.13.30.132:8080';
 const TIMEOUT = 30000;
 const TAG = 'ApiService';
 

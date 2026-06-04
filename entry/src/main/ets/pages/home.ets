@@ -123,7 +123,8 @@ struct Home {
 
         Badge({
           count: this.cartCount,
-          style: { badgeSize: 16, badgeColor: $r('app.color.color_primary') },
+          // 修改：顶部的购物车提示气泡颜色改为浅蓝色资源
+          style: { badgeSize: 16, badgeColor:  $r('app.color.color_primary')},
           position: BadgePosition.Right
         }) {
           Image($r('app.media.ic_cart'))
@@ -183,7 +184,8 @@ struct Home {
                       .fontSize(14)
                       .fontColor(this.selectedCategory === category ? '#FFFFFF' : '#666666')
                       .padding({ left: 20, right: 20, top: 8, bottom: 8 })
-                      .backgroundColor(this.selectedCategory === category ? '#FF6B35' : '#F5F5F5')
+                      // 修改：美食分类选中的高亮背景色改为浅蓝色资源
+                      .backgroundColor(this.selectedCategory === category ? $r('app.color.color_primary') : '#F5F5F5')
                       .borderRadius(20)
                   }
                   .margin({ right: 10 })
@@ -295,7 +297,7 @@ struct Home {
       Row() {
         Text('¥' + dish.price)
           .fontSize(16)
-          .fontColor('#FF6B35')
+          .fontColor($r('app.color.color_primary')) // 修改：菜品价格颜色由硬编码改为浅蓝色资源
           .fontWeight(FontWeight.Bold)
 
         Blank()
@@ -303,7 +305,7 @@ struct Home {
         Image($r('app.media.ic_add'))
           .width(24)
           .height(24)
-          .fillColor('#FF6B35')
+          .fillColor($r('app.color.color_primary')) // 修改：添加按钮的加号颜色由硬编码改为浅蓝色资源
           .onClick(() => {
             this.addToCart(dish);
           })
@@ -334,11 +336,11 @@ struct Home {
       Image(icon)
         .width(26)
         .height(26)
-        .fillColor(isSelected ? '#FF6B35' : '#999999')
+        .fillColor(isSelected ? $r('app.color.color_primary') : '#999999') // 修改：导航栏选中图标改为浅蓝色资源
 
       Text(title)
         .fontSize(12)
-        .fontColor(isSelected ? '#FF6B35' : '#999999')
+        .fontColor(isSelected ? $r('app.color.color_primary') : '#999999') // 修改：导航栏选中文字改为浅蓝色资源
         .margin({ top: 4 })
     }
     .alignItems(HorizontalAlign.Center)

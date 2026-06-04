@@ -82,7 +82,7 @@ struct Splash {
       .height('100%')
       .justifyContent(FlexAlign.Center)
       .alignItems(HorizontalAlign.Center)
-      .backgroundColor('#FF9F43')
+      .backgroundColor('#ff9affcb')
     }
     .width('100%')
     .height('100%')
