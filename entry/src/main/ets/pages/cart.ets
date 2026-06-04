@@ -32,7 +32,6 @@ struct Cart {
       this.cartItems = await ApiService.getCartList();
       hilog.info(0x0000, 'Cart', '购物车数据: %{public}s', JSON.stringify(this.cartItems));
       this.cartItems.forEach(item => {
-        // 在适当的位置添加日志，检查数据
         console.log('item对象:', JSON.stringify(item));
         console.log('dish属性:', item?.dish);
         console.log('price值:', item?.dish?.price);
@@ -71,6 +70,7 @@ struct Cart {
 
   build() {
     Column() {
+      // 导航栏
       Row() {
         Image($r('app.media.ic_backward'))
           .width(24)
@@ -88,7 +88,7 @@ struct Cart {
         if (this.cartItems.length > 0) {
           Text('清空')
             .fontSize(14)
-            .fontColor('#FF6B35')
+            .fontColor('#66B1FF') // 👈 改为浅蓝辅助色
             .onClick(() => {
               this.clearCart();
             })
@@ -99,11 +99,13 @@ struct Cart {
       .padding({ left: 15, right: 15 })
       .backgroundColor('#FFFFFF')
 
+      // 主体内容区
       if (this.isLoading) {
         Blank()
         LoadingProgress()
           .width(40)
           .height(40)
+          .color('#409EFF') // 👈 加载动画改为浅蓝色
       } else if (this.cartItems.length === 0) {
         Blank()
         Column() {
@@ -119,7 +121,7 @@ struct Cart {
 
           Text('去添加一些美食吧')
             .fontSize(14)
-            .fontColor('#CCCCCC')
+            .fontColor('#409EFF') // 👈 引导文字改为浅蓝色
             .margin({ top: 10 })
             .onClick(() => {
               router.replaceUrl({ url: 'pages/home' });
@@ -130,7 +132,7 @@ struct Cart {
           Column() {
             ForEach(this.cartItems, (item: CartItem) => {
               this.CartItemCard(item)
-            })
+            }, (item: CartItem) => item.id.toString())
           }
           .padding({ bottom: 20 })
         }
@@ -140,11 +142,13 @@ struct Cart {
         .layoutWeight(1)
       }
 
+      // 底部结算栏
       if (this.cartItems.length > 0) {
         Row() {
           Row() {
             Checkbox()
               .select(this.selectedItems.size === this.cartItems.length)
+              .selectedColor('#409EFF') // 👈 复选框选中色改为浅蓝
               .onChange((isSelected: boolean) => {
                 if (isSelected) {
                   this.selectedItems = new Set(this.cartItems.map(item => item.id));
@@ -169,14 +173,14 @@ struct Cart {
             Text('¥' + this.getTotalPrice().toFixed(2))
               .fontSize(20)
               .fontWeight(FontWeight.Bold)
-              .fontColor('#FF6B35')
+              .fontColor('#409EFF') // 👈 金额高亮色改为浅蓝
           }
           .alignItems(HorizontalAlign.End)
 
           Button('去结算(' + this.getTotalCount() + ')')
             .fontSize(14)
             .fontColor('#FFFFFF')
-            .backgroundColor('#FF6B35')
+            .backgroundColor('#409EFF') // 👈 结算按钮底色改为浅蓝
             .borderRadius(20)
             .padding({ left: 20, right: 20, top: 10, bottom: 10 })
             .margin({ left: 15 })
@@ -200,7 +204,7 @@ struct Cart {
     }
     .width('100%')
     .height('100%')
-    .backgroundColor('#F5F5F5')
+    .backgroundColor('#EBF5FF') // 👈 整个页面的背景衬底色升级为舒适的极浅蓝色
   }
 
   @Builder
@@ -208,8 +212,8 @@ struct Cart {
     Row() {
       Checkbox()
         .select(this.selectedItems.has(item.id))
+        .selectedColor('#409EFF') // 👈 列表内复选框选中色改为浅蓝
         .onChange((isSelected: boolean) => {
-          // 创建新的Set对象来触发状态更新
           const newSelectedItems = new Set(this.selectedItems);
           if (isSelected) {
             newSelectedItems.add(item.id);
@@ -235,7 +239,7 @@ struct Cart {
 
         Text('¥' + item.dish.price)
           .fontSize(14)
-          .fontColor('#FF6B35')
+          .fontColor('#409EFF') // 👈 列表菜品单价改为浅蓝高亮
           .margin({ top: 5 })
       }
       .layoutWeight(1)
@@ -271,7 +275,7 @@ struct Cart {
             .width(28)
             .height(28)
             .textAlign(TextAlign.Center)
-            .backgroundColor('#FF6B35')
+            .backgroundColor('#409EFF') // 👈 数量加号底色改为浅蓝
             .borderRadius(4)
             .onClick(() => {
               this.updateQuantity(item, 1);
@@ -280,7 +284,7 @@ struct Cart {
 
         Text('删除')
           .fontSize(12)
-          .fontColor('#FF6B35')
+          .fontColor('#66B1FF') // 👈 每一项的删除按钮改为浅蓝辅助色
           .margin({ top: 8 })
           .onClick(() => {
             this.removeItem(item);
@@ -288,7 +292,10 @@ struct Cart {
       }
     }
     .width('100%')
-    .padding({ left: 15, right: 15, top: 15 })
+    .padding(15)
+    .margin({ top: 10, left: 15, right: 15 })
+    .backgroundColor('#FFFFFF')
+    .borderRadius(12) // 👈 升级卡片化圆角，配合浅蓝底色质感更好
     .alignItems(VerticalAlign.Center)
   }
 
@@ -301,11 +308,9 @@ struct Cart {
     try {
       await ApiService.updateCartItem(item.id, newQuantity);
 
-      // 创建新数组来触发状态更新
       const updatedItems: CartItem[] = [];
       for (let i = 0; i < this.cartItems.length; i++) {
         if (this.cartItems[i].id === item.id) {
-          // 创建新的CartItem对象
           const updatedItem = new CartItem();
           updatedItem.id = this.cartItems[i].id;
           updatedItem.userId = this.cartItems[i].userId;
@@ -320,7 +325,6 @@ struct Cart {
         }
       }
 
-      // 赋值新数组触发UI更新
       this.cartItems = updatedItems;
     } catch (e) {
       promptAction.showToast({ message: '更新失败', duration: 1500 });
@@ -334,7 +338,6 @@ struct Cart {
       if (index > -1) {
         this.cartItems.splice(index, 1);
       }
-      // 创建新的Set对象来触发状态更新
       const newSelectedItems = new Set(this.selectedItems);
       newSelectedItems.delete(item.id);
       this.selectedItems = newSelectedItems;
