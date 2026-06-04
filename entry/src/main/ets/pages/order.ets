@@ -85,7 +85,7 @@ struct Order {
 
   getStatusColor(status: number): string {
     let colorMap: Record<number, string> = {
-      0: '#FF9800',
+      0: '#409EFF',
       1: '#2196F3',
       2: '#4CAF50',
       3: '#999999',
@@ -140,7 +140,7 @@ struct Order {
             Image($r('app.media.icon'))
               .width(40)
               .height(40)
-              .fillColor('#FF6B35')
+              .fillColor('#409EFF')
 
             Column() {
               if (this.selectedAddress!=null) {
@@ -156,9 +156,9 @@ struct Order {
               } else {
                 Text('请添加收货地址')
                   .fontSize(16)
-                  .fontColor('#FF6B35')
-                  .backgroundColor('#F0F0F0') // 临时添加背景色
-                  .border({ width: 1, color: Color.Red }) // 临时添加
+                  .fontColor('#409EFF')
+                  .backgroundColor('#F0F0F0')
+                  .border({ width: 1, color: Color.Red })
               }
             }
             .layoutWeight(1)
@@ -216,7 +216,7 @@ struct Order {
           Text('¥' + this.totalPrice.toFixed(2))
             .fontSize(22)
             .fontWeight(FontWeight.Bold)
-            .fontColor('#FF6B35')
+            .fontColor('#409EFF')
         }
         .alignItems(HorizontalAlign.Start)
         .padding({ left: 15 })
@@ -226,7 +226,7 @@ struct Order {
         Button('提交订单')
           .fontSize(16)
           .fontColor('#FFFFFF')
-          .backgroundColor('#FF6B35')
+          .backgroundColor('#409EFF')
           .borderRadius(25)
           .padding({ left: 30, right: 30, top: 12, bottom: 12 })
           .margin({ right: 15 })
@@ -275,7 +275,7 @@ struct Order {
       Row() {
         Text('全部')
           .fontSize(14)
-          .fontColor(this.currentTab === 0 ? '#FF6B35' : '#666666')
+          .fontColor(this.currentTab === 0 ? '#409EFF' : '#666666')
           .padding({ left: 20, right: 20, top: 10, bottom: 10 })
           .onClick(() => {
             this.currentTab = 0;
@@ -283,7 +283,7 @@ struct Order {
 
         Text('待支付')
           .fontSize(14)
-          .fontColor(this.currentTab === 1 ? '#FF6B35' : '#666666')
+          .fontColor(this.currentTab === 1 ? '#409EFF' : '#666666')
           .padding({ left: 20, right: 20, top: 10, bottom: 10 })
           .onClick(() => {
             this.currentTab = 1;
@@ -291,7 +291,7 @@ struct Order {
 
         Text('已完成')
           .fontSize(14)
-          .fontColor(this.currentTab === 2 ? '#FF6B35' : '#666666')
+          .fontColor(this.currentTab === 2 ? '#409EFF' : '#666666')
           .padding({ left: 20, right: 20, top: 10, bottom: 10 })
           .onClick(() => {
             this.currentTab = 2;
@@ -357,7 +357,7 @@ struct Order {
 
       Row() {
         Column() {
-          Text('')//(order.address)
+          Text('')
             .fontSize(14)
             .fontColor('#666666')
             .maxLines(1)
@@ -368,13 +368,13 @@ struct Order {
         Text('¥' + order.totalAmount)
           .fontSize(18)
           .fontWeight(FontWeight.Bold)
-          .fontColor('#FF6B35')
+          .fontColor('#409EFF')
       }
       .width('100%')
       .padding(15)
 
       Row() {
-        Text('')//(order.createTime)
+        Text('')
           .fontSize(12)
           .fontColor('#999999')
 
@@ -384,7 +384,7 @@ struct Order {
           Button('支付')
             .fontSize(12)
             .fontColor('#FFFFFF')
-            .backgroundColor('#FF6B35')
+            .backgroundColor('#409EFF')
             .borderRadius(15)
             .padding({ left: 15, right: 15, top: 5, bottom: 5 })
             .onClick(() => {

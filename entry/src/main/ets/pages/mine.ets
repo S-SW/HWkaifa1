@@ -37,7 +37,7 @@ struct Mine {
     }
     .width('100%')
     .height('100%')
-    .backgroundColor('#ffc2faf5')
+    .backgroundColor('#E6F4F8')
   }
 
   @Builder
@@ -135,11 +135,11 @@ struct Mine {
                 Text(this.userInfo?.nickname || this.userInfo?.username || '用户')
                   .fontSize(20)
                   .fontWeight(FontWeight.Bold)
-                  .fontColor('#333333')
+                  .fontColor('#409EFF')
 
                 Text('用户名: ' + (this.userInfo?.username || ''))
                   .fontSize(14)
-                  .fontColor('#999999')
+                  .fontColor('#409EFF')
                   .margin({ top: 5 })
               }
               .margin({ left: 15 })
@@ -220,17 +220,16 @@ struct Mine {
       Image(icon)
         .width(24)
         .height(24)
-        .fillColor('#FF6B35')
+        .fillColor('#409EFF')
 
       Text(title)
         .fontSize(16)
-        .fontColor('#333333')
-        .margin({ left: 15 })
+        .fontColor('#409EFF')
 
       Image($r('app.media.ic_backward'))
         .width(16)
         .height(16)
-        .fillColor('#CCCCCC')
+        .fillColor('#409EFF')
         .rotate({ angle: 180 })
     }
     .width('100%')

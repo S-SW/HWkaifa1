@@ -30,7 +30,7 @@ struct Login {
       }
       .width('100%')
       .height(220)
-      .backgroundColor('#FF6B35')
+      .backgroundColor('#409EFF')
       .justifyContent(FlexAlign.Center)
       .alignItems(HorizontalAlign.Center)
 
@@ -69,7 +69,7 @@ struct Login {
           .height(50)
           .fontSize(18)
           .fontWeight(FontWeight.Medium)
-          .backgroundColor('#FF6B35')
+          .backgroundColor('#409EFF')
           .borderRadius(25)
           .enabled(!this.isLoading)
           .onClick(() => {
