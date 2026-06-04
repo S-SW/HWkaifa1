@@ -111,7 +111,7 @@ struct Order {
     }
     .width('100%')
     .height('100%')
-    .backgroundColor('#F5F5F5')
+    .backgroundColor('#EBF5FF') // 页面全局背景色改成浅蓝色
   }
 
   @Builder
@@ -309,7 +309,6 @@ struct Order {
         .width(40)
         .height(40)
     } else {
-      // 使用辅助方法获取筛选后的订单
       if (this.getFilteredOrders(status).length === 0) {
         Blank()
         Column() {
@@ -380,10 +379,7 @@ struct Order {
       .padding(15)
 
       Row() {
-        Text(`订单编号：${order.orderNo}`)
-          .fontSize(12)
-          .fontColor('#999999')
-
+        // 【已修改】删除了原本显示在左下角的重复的“订单编号”文本，只保留了操作按钮的布局结构
         Blank()
 
         // 支付按钮（仅待支付状态显示）
@@ -452,7 +448,6 @@ struct Order {
   }
 
   async cancelOrder(order: OrderModel) {
-    // 显示确认对话框
     promptAction.showDialog({
       title: '提示',
       message: '确认取消该订单吗？',
@@ -461,13 +456,11 @@ struct Order {
         { text: '确认', color: '#F44336' }
       ]
     }).then(async (result) => {
-      if (result.index === 1) { // 确认按钮
+      if (result.index === 1) {
         try {
-          // 调用API取消订单
           let success = await ApiService.cancelOrder(order.id);
           if (success) {
             promptAction.showToast({ message: '取消成功！', duration: 2000 });
-            // 刷新订单列表
             await this.loadOrders();
           } else {
             promptAction.showToast({ message: '取消失败，请重试', duration: 2000 });
@@ -477,7 +470,6 @@ struct Order {
         }
       }
     }).catch(() => {
-      // 用户取消对话框
     });
   }
 }

@@ -1,3 +1,4 @@
+// pages/PersonalInfo.ets
 import router from '@ohos.router';
 import promptAction from '@ohos.promptAction';
 import ApiService from '../network/ApiService';
@@ -50,10 +51,11 @@ struct PersonalInfo {
 
   build() {
     Column() {
+      // 顶部导航栏 - 改为深蓝底白字，并修正绝对居中
       Row() {
         Image($r('app.media.ic_backward'))
-          .width(24)
-          .height(24)
+          .width(22)
+          .height(22)
           .onClick(() => {
             router.back();
           })
@@ -61,63 +63,72 @@ struct PersonalInfo {
         Text('个人信息')
           .fontSize(20)
           .fontWeight(FontWeight.Bold)
+          .fontColor('#FFFFFF') // 文字改为白色
           .layoutWeight(1)
           .textAlign(TextAlign.Center)
-
-        Text('')
-          .width(24)
+          .margin({ right: 22 }) // 抵消返回键宽度以居中
       }
       .width('100%')
-      .height(60)
-      .padding({ left: 15, right: 15 })
-      .backgroundColor('#FFFFFF')
+      .height(56)
+      .padding({ left: 16, right: 16 })
+      .backgroundColor('#409EFF') // 改为主题深蓝色
 
       if (this.isLoading) {
         Blank()
         LoadingProgress()
           .width(40)
           .height(40)
+          .color('#409EFF') // 加载动画改为主题蓝色
+        Blank()
       } else {
         Scroll() {
           Column() {
+            // 头像与基本信息卡片
             Column() {
               Row() {
                 Image(this.userInfo?.avatarUrl || $r('app.media.ic_user_default'))
-                  .width(100)
-                  .height(100)
-                  .borderRadius(50)
-                  .backgroundColor('#F5F5F5')
+                  .width(90)
+                  .height(90)
+                  .borderRadius(45)
+                  .backgroundColor('#F5F7FA')
               }
               .width('100%')
               .justifyContent(FlexAlign.Center)
-              .padding({ top: 30, bottom: 20 })
+              .padding({ top: 24, bottom: 16 })
 
               Text(this.displayName)
-                .fontSize(20)
+                .fontSize(18)
                 .fontWeight(FontWeight.Bold)
                 .fontColor('#333333')
-                .margin({ bottom: 5 })
+                .margin({ bottom: 6 })
 
               Text('ID: ' + (this.userInfo?.userId || ''))
-                .fontSize(14)
+                .fontSize(13)
                 .fontColor('#999999')
             }
-            .width('100%')
+            .width('calc(100% - 32vp)') // 左右留出间距，拒绝死板贴边
+            .padding({ bottom: 20 })
             .backgroundColor('#FFFFFF')
-            .margin({ top: 10 })
+            .borderRadius(12)
+            .shadow({ radius: 8, color: '#08000000', offsetX: 0, offsetY: 4 }) // 融入精致微阴影
+            .margin({ top: 16 }) // 控制顶部距离
 
+            // 详细账号信息卡片
             Column() {
               this.InfoItem('昵称', this.nickname)
-              Divider().width('90%').margin({ left: 50 })
+              Divider().width('92%').color('#EDF2F7')
               this.InfoItem('用户名', this.username)
-              Divider().width('90%').margin({ left: 50 })
+              Divider().width('92%').color('#EDF2F7')
               this.InfoItem('手机号', this.phone)
             }
-            .width('100%')
+            .width('calc(100% - 32vp)') // 保持间距一致
             .backgroundColor('#FFFFFF')
-            .margin({ top: 10 })
+            .borderRadius(12)
+            .shadow({ radius: 8, color: '#08000000', offsetX: 0, offsetY: 4 })
+            .margin({ top: 14, bottom: 16 })
           }
-          .padding({ bottom: 20 })
+          .width('100%')
+          .alignItems(HorizontalAlign.Center)
         }
         .align(Alignment.Top)
         .scrollable(ScrollDirection.Vertical)
@@ -127,24 +138,24 @@ struct PersonalInfo {
     }
     .width('100%')
     .height('100%')
-    .backgroundColor('#F5F5F5')
+    .backgroundColor('#E6F4F8') // 改为与整体 App 匹配的舒适清爽浅蓝色底色
   }
 
   @Builder
   InfoItem(label: string, value: string) {
     Row() {
       Text(label)
-        .fontSize(16)
+        .fontSize(15)
         .fontColor('#666666')
         .width(80)
 
       Text(value)
-        .fontSize(16)
+        .fontSize(15)
         .fontColor('#333333')
         .layoutWeight(1)
         .textAlign(TextAlign.End)
     }
     .width('100%')
-    .padding(15)
+    .padding({ left: 16, right: 16, top: 16, bottom: 16 })
   }
 }
