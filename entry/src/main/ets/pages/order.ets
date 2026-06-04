@@ -25,7 +25,6 @@ struct Order {
   @State totalCount: number = 0;
   @State cartItems: CartItem[] = [];
 
-
   async aboutToAppear() {
     const hasAuth = await AuthGuard.checkAuthAndRedirect('pages/order');
     if (!hasAuth) {
@@ -37,7 +36,7 @@ struct Order {
       if (params.totalPrice) {
         this.totalPrice = params.totalPrice;
       }
-      if(params.totalCount){
+      if (params.totalCount) {
         this.totalCount = params.totalCount;
       }
 
@@ -94,6 +93,14 @@ struct Order {
     return colorMap[status] || '#999999';
   }
 
+  // 辅助方法：根据状态筛选订单
+  getFilteredOrders(status: number): OrderModel[] {
+    if (status === -1) {
+      return this.orders;
+    }
+    return this.orders.filter(order => order.status === status);
+  }
+
   build() {
     Column() {
       if (this.isCreateMode) {
@@ -143,7 +150,7 @@ struct Order {
               .fillColor('#409EFF')
 
             Column() {
-              if (this.selectedAddress!=null) {
+              if (this.selectedAddress != null) {
                 Text(this.selectedAddress.contactName + ' ' + this.selectedAddress.contactPhone)
                   .fontSize(16)
                   .fontWeight(FontWeight.Medium)
@@ -157,8 +164,6 @@ struct Order {
                 Text('请添加收货地址')
                   .fontSize(16)
                   .fontColor('#409EFF')
-                  .backgroundColor('#F0F0F0')
-                  .border({ width: 1, color: Color.Red })
               }
             }
             .layoutWeight(1)
@@ -272,40 +277,40 @@ struct Order {
       .padding({ left: 15, right: 15 })
       .backgroundColor('#FFFFFF')
 
-      Row() {
-        Text('全部')
-          .fontSize(14)
-          .fontColor(this.currentTab === 0 ? '#409EFF' : '#666666')
-          .padding({ left: 20, right: 20, top: 10, bottom: 10 })
-          .onClick(() => {
-            this.currentTab = 0;
-          })
+      Tabs({ index: this.currentTab }) {
+        TabContent() {
+          this.OrderListByStatus(-1)
+        }
+        .tabBar('全部')
 
-        Text('待支付')
-          .fontSize(14)
-          .fontColor(this.currentTab === 1 ? '#409EFF' : '#666666')
-          .padding({ left: 20, right: 20, top: 10, bottom: 10 })
-          .onClick(() => {
-            this.currentTab = 1;
-          })
+        TabContent() {
+          this.OrderListByStatus(0)
+        }
+        .tabBar('待支付')
 
-        Text('已完成')
-          .fontSize(14)
-          .fontColor(this.currentTab === 2 ? '#409EFF' : '#666666')
-          .padding({ left: 20, right: 20, top: 10, bottom: 10 })
-          .onClick(() => {
-            this.currentTab = 2;
-          })
+        TabContent() {
+          this.OrderListByStatus(3)
+        }
+        .tabBar('已完成')
       }
       .width('100%')
-      .backgroundColor('#FFFFFF')
+      .layoutWeight(1)
+      .onChange((index: number) => {
+        this.currentTab = index;
+      })
+    }
+  }
 
-      if (this.isLoading) {
-        Blank()
-        LoadingProgress()
-          .width(40)
-          .height(40)
-      } else if (this.orders.length === 0) {
+  @Builder
+  OrderListByStatus(status: number) {
+    if (this.isLoading) {
+      Blank()
+      LoadingProgress()
+        .width(40)
+        .height(40)
+    } else {
+      // 使用辅助方法获取筛选后的订单
+      if (this.getFilteredOrders(status).length === 0) {
         Blank()
         Column() {
           Image($r('app.media.icon'))
@@ -318,12 +323,13 @@ struct Order {
             .fontColor('#999999')
             .margin({ top: 20 })
         }
+        .layoutWeight(1)
       } else {
         Scroll() {
           Column() {
-            ForEach(this.orders, (order: OrderModel) => {
+            ForEach(this.getFilteredOrders(status), (order: OrderModel) => {
               this.OrderCard(order)
-            })
+            }, (order: OrderModel) => order.id.toString())
           }
           .padding(15)
         }
@@ -357,7 +363,7 @@ struct Order {
 
       Row() {
         Column() {
-          Text('')
+          Text(`订单金额：¥${order.totalAmount}`)
             .fontSize(14)
             .fontColor('#666666')
             .maxLines(1)
@@ -374,12 +380,13 @@ struct Order {
       .padding(15)
 
       Row() {
-        Text('')
+        Text(`订单编号：${order.orderNo}`)
           .fontSize(12)
           .fontColor('#999999')
 
         Blank()
 
+        // 支付按钮（仅待支付状态显示）
         if (order.status === 0) {
           Button('支付')
             .fontSize(12)
@@ -387,8 +394,22 @@ struct Order {
             .backgroundColor('#409EFF')
             .borderRadius(15)
             .padding({ left: 15, right: 15, top: 5, bottom: 5 })
+            .margin({ right: 8 })
             .onClick(() => {
               this.payOrder(order);
+            })
+        }
+
+        // 取消订单按钮（待支付 或 待发货状态可取消）
+        if (order.status === 0 || order.status === 1) {
+          Button('取消订单')
+            .fontSize(12)
+            .fontColor('#FFFFFF')
+            .backgroundColor('#F44336')
+            .borderRadius(15)
+            .padding({ left: 15, right: 15, top: 5, bottom: 5 })
+            .onClick(() => {
+              this.cancelOrder(order);
             })
         }
       }
@@ -414,7 +435,7 @@ struct Order {
     }
 
     try {
-      let order = await ApiService.createOrder(this.selectedAddress.id,this.cartItems,'',1);
+      let order = await ApiService.createOrder(this.selectedAddress.id, this.cartItems, '', 1);
       if (order && order.id) {
         promptAction.showToast({ message: '订单创建成功', duration: 2000 });
         setTimeout(() => {
@@ -428,5 +449,35 @@ struct Order {
 
   async payOrder(order: OrderModel) {
     promptAction.showToast({ message: '支付功能开发中', duration: 2000 });
+  }
+
+  async cancelOrder(order: OrderModel) {
+    // 显示确认对话框
+    promptAction.showDialog({
+      title: '提示',
+      message: '确认取消该订单吗？',
+      buttons: [
+        { text: '取消', color: '#666666' },
+        { text: '确认', color: '#F44336' }
+      ]
+    }).then(async (result) => {
+      if (result.index === 1) { // 确认按钮
+        try {
+          // 调用API取消订单
+          let success = await ApiService.cancelOrder(order.id);
+          if (success) {
+            promptAction.showToast({ message: '取消成功！', duration: 2000 });
+            // 刷新订单列表
+            await this.loadOrders();
+          } else {
+            promptAction.showToast({ message: '取消失败，请重试', duration: 2000 });
+          }
+        } catch (e) {
+          promptAction.showToast({ message: '取消失败，请重试', duration: 2000 });
+        }
+      }
+    }).catch(() => {
+      // 用户取消对话框
+    });
   }
 }

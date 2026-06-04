@@ -131,7 +131,10 @@ export class ApiService {
             resolve(result.result as T);
           }
         } else {
-          reject(new Error(`Request failed with code: ${result.responseCode}`));
+          // 记录详细的错误响应
+          hilog.error(0x0000, TAG, '请求失败 - 状态码: %{public}d, 响应内容: %{public}s',
+            result.responseCode, result.result as string);
+          reject(new Error(`Request failed with code: ${result.responseCode}, message: ${result.result}`));
         }
       });
     });
@@ -208,6 +211,18 @@ export class ApiService {
     return result.data || [];
   }
 
+  // ApiService.ets 中的 cancelOrder 方法修改建议
+  async cancelOrder(orderId: number): Promise<boolean> {
+    hilog.info(0x0000, TAG, '取消订单请求 - orderId: %{public}d', orderId);
+
+    // 尝试改为 post，因为很多后端接口的取消逻辑只对 POST 开放
+    // 如果还是报错，请确认后端代码中是否定义为 @PostMapping("/cancel/{id}")
+    let result = await this.post<ApiResponse<null>>('/order/cancel/' + orderId);
+
+    hilog.info(0x0000, TAG, '取消订单响应: %{public}s', JSON.stringify(result));
+    return result.code === 0 || result.code === 200 || result.success === true;
+  }
+
   async login(username: string, password: string): Promise<User> {
     hilog.info(0x0000, TAG, '登录请求 - 用户名: %{public}s', username);
     let body: LoginRequest = { username, password };
@@ -264,6 +279,8 @@ export class ApiService {
     // 👈 核心修复：允许状态码为 0 或 200，或者 success 为 true 都算作成功
     return result.code === 0 || result.code === 200 || result.success === true;
   }
+
+
 
   async deleteAddress(id: number): Promise<boolean> {
     let result = await this.delete<ApiResponse<null>>('/address/' + id);
