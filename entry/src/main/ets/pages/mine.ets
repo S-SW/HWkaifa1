@@ -183,6 +183,13 @@ struct Mine {
 
             Divider().width('90%').margin({ left: 50 })
 
+
+            this.MenuItem('意见反馈', $r('app.media.ic_my'), () => {
+              router.pushUrl({ url: 'pages/feedback' });
+            })
+
+            Divider().width('90%').margin({ left: 50 })
+
             this.MenuItem('关于我们', $r('app.media.ic_my'), () => {
               promptAction.showToast({ message: '食堂订餐 v1.0.0', duration: 2000 });
             })

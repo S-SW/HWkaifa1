@@ -291,6 +291,10 @@ export class ApiService {
     let result = await this.get<ApiResponse<Banner[]>>('/banner/list');
     return result.data || [];
   }
+
 }
 
+
+
 export default ApiService.getInstance();
+

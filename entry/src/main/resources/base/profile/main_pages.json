@@ -10,6 +10,7 @@
     "pages/mine",
     "pages/address",
     "pages/addressEdit",
-    "pages/personalInfo"
+    "pages/personalInfo",
+    "pages/feedback"
   ]
 }

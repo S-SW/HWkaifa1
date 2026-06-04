@@ -199,6 +199,8 @@ export class User {
   }
 }
 
+
+
 export class Address {
   id: number = 0;
   userId: number = 0;
@@ -235,6 +237,28 @@ export class Banner {
       this.image = (data as Banner).image || '';
       this.link = (data as Banner).link || '';
       this.sort = (data as Banner).sort || 0;
+    }
+  }
+}
+
+export class Feedback {
+  id: string = '';
+  userId: number = 0;
+  content: string = '';
+  contact: string = '';
+  createTime: number = 0;
+  status: string = '待处理';
+
+  // 将 any 改为 object
+  constructor(data?: object) {
+    if (data) {
+      // 使用类型断言 (data as Feedback) 来访问属性
+      this.id = (data as Feedback).id || '';
+      this.userId = (data as Feedback).userId || 0;
+      this.content = (data as Feedback).content || '';
+      this.contact = (data as Feedback).contact || '';
+      this.createTime = (data as Feedback).createTime || 0;
+      this.status = (data as Feedback).status || '待处理';
     }
   }
 }
