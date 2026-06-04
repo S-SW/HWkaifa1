@@ -17,6 +17,21 @@ struct Home {
   @State cartCount: number = 0;
   @State isLoggedIn: boolean = false;
 
+  @State localBanners: Resource[] = [
+    $r('app.media.banner1'),
+    $r('app.media.banner2'),
+    $r('app.media.banner3')
+  ];
+
+  // ==================== 布局自适应配置面板 ====================
+  // 💡 【核心修改点 1】: 在这里自由切换列数
+  // 若想改为 1 列大图流：设为 1； 若想改为 3 列紧凑流：设为 3
+  @State columnsCount: number = 3;
+
+  // 💡 【核心修改点 2】: 卡片间距与图片圆角统一管理
+  @State cardGaps: number = 12;       // 网格卡片之间的间距 (单位: vp)
+  @State imageBorderRadius: number = 12; // 图片及卡片的圆角弧度 (单位: vp)
+  // =========================================================
 
   async aboutToAppear() {
     this.checkLoginStatus();
@@ -123,7 +138,6 @@ struct Home {
 
         Badge({
           count: this.cartCount,
-          // 修改：顶部的购物车提示气泡颜色改为浅蓝色资源
           style: { badgeSize: 16, badgeColor:  $r('app.color.color_primary')},
           position: BadgePosition.Right
         }) {
@@ -142,11 +156,10 @@ struct Home {
 
       Scroll() {
         Column() {
-          if (this.banners && this.banners.length > 0) {
+          if (this.localBanners && this.localBanners.length > 0) {
             Swiper() {
-              ForEach(this.banners, (banner: Banner, index: number) => {
-                //  Image(banner.image)
-                Image($r('app.media.banner1'))
+              ForEach(this.localBanners, (imgResource: Resource) => {
+                Image(imgResource)
                   .width('100%')
                   .height(180)
                   .objectFit(ImageFit.Cover)
@@ -184,7 +197,6 @@ struct Home {
                       .fontSize(14)
                       .fontColor(this.selectedCategory === category ? '#FFFFFF' : '#666666')
                       .padding({ left: 20, right: 20, top: 8, bottom: 8 })
-                      // 修改：美食分类选中的高亮背景色改为浅蓝色资源
                       .backgroundColor(this.selectedCategory === category ? $r('app.color.color_primary') : '#F5F5F5')
                       .borderRadius(20)
                   }
@@ -211,6 +223,7 @@ struct Home {
               .width('100%')
               .padding({ left: 15, top: 15, bottom: 10 })
 
+            // 💡 【核心修改点 3】: 动态生成网格布局模板，并绑定动态间距，适配屏幕
             Grid() {
               ForEach(this.getFilteredDishes(), (dish: Dish) => {
                 GridItem() {
@@ -219,11 +232,14 @@ struct Home {
               })
             }
             .width('100%')
-            .columnsTemplate('1fr 1fr')
-            .columnsGap(10)
-            .rowsGap(10)
+            // 根据配置的列数，自动生成 '1fr' / '1fr 1fr' / '1fr 1fr 1fr' 从而完美适配多端屏幕
+            .columnsTemplate(Array(this.columnsCount).fill('1fr').join(' '))
+            .columnsGap(this.cardGaps)
+            .rowsGap(this.cardGaps)
             .padding({ left: 15, right: 15 })
-            .height(this.getFilteredDishes().length > 0 ? Math.ceil(this.getFilteredDishes().length / 2) * 200 : 200)
+            // 依据列数动态调整网格的整体包裹高度
+            .height(this.getFilteredDishes().length > 0 ?
+              Math.ceil(this.getFilteredDishes().length / this.columnsCount) * (this.columnsCount === 1 ? 260 : (this.columnsCount === 3 ? 170 : 200)) : 200)
           }
           .width('100%')
           .backgroundColor('#FFFFFF')
@@ -272,53 +288,53 @@ struct Home {
     .width('100%')
     .height('100%')
     .backgroundColor('#F5F5F5')
-
-
   }
 
   @Builder
   DishCard(dish: Dish) {
     Column() {
+      // 💡 【核心修改点 4】: 自适应图片高度，并应用动态图片圆角
       Image(dish.imageUrl || $r('app.media.icon'))
         .width('100%')
-        .height(120)
+        // 根据不同列数智能调节图片展示比例：1列用大图（150），3列用小图（90）
+        .height(this.columnsCount === 1 ? 160 : (this.columnsCount === 3 ? 90 : 120))
         .objectFit(ImageFit.Cover)
-        .borderRadius({ topLeft: 10, topRight: 10 })
+        .borderRadius({ topLeft: this.imageBorderRadius, topRight: this.imageBorderRadius })
 
       Text(dish.name)
-        .fontSize(14)
+        .fontSize(this.columnsCount === 3 ? 12 : 14) // 3列时字体适度缩小防重叠
         .fontColor('#333333')
         .fontWeight(FontWeight.Medium)
         .maxLines(1)
         .textOverflow({ overflow: TextOverflow.Ellipsis })
         .width('100%')
-        .padding({ left: 8, right: 8, top: 8 })
+        .padding({ left: 8, right: 8, top: 6 })
 
       Row() {
         Text('¥' + dish.price)
-          .fontSize(16)
-          .fontColor($r('app.color.color_primary')) // 修改：菜品价格颜色由硬编码改为浅蓝色资源
+          .fontSize(this.columnsCount === 3 ? 14 : 16)
+          .fontColor($r('app.color.color_primary'))
           .fontWeight(FontWeight.Bold)
 
         Blank()
 
         Image($r('app.media.ic_add'))
-          .width(24)
-          .height(24)
-          .fillColor($r('app.color.color_primary')) // 修改：添加按钮的加号颜色由硬编码改为浅蓝色资源
+          .width(this.columnsCount === 3 ? 20 : 24) // 3列时按钮适度缩小
+          .height(this.columnsCount === 3 ? 20 : 24)
+          .fillColor($r('app.color.color_primary'))
           .onClick(() => {
             this.addToCart(dish);
           })
       }
       .width('100%')
-      .padding({ left: 8, right: 8, bottom: 8 })
+      .padding({ left: 8, right: 8, bottom: 6, top: 2 })
     }
     .width('100%')
     .backgroundColor('#FFFFFF')
-    .borderRadius(10)
+    .borderRadius(this.imageBorderRadius) // 卡片整体应用新圆角
     .shadow({
-      radius: 5,
-      color: '#10000000',
+      radius: 4,
+      color: '#0D000000',
       offsetX: 0,
       offsetY: 2
     })
@@ -336,11 +352,11 @@ struct Home {
       Image(icon)
         .width(26)
         .height(26)
-        .fillColor(isSelected ? $r('app.color.color_primary') : '#999999') // 修改：导航栏选中图标改为浅蓝色资源
+        .fillColor(isSelected ? $r('app.color.color_primary') : '#999999')
 
       Text(title)
         .fontSize(12)
-        .fontColor(isSelected ? $r('app.color.color_primary') : '#999999') // 修改：导航栏选中文字改为浅蓝色资源
+        .fontColor(isSelected ? $r('app.color.color_primary') : '#999999')
         .margin({ top: 4 })
     }
     .alignItems(HorizontalAlign.Center)
@@ -364,5 +380,4 @@ struct Home {
       promptAction.showToast({ message: '添加失败', duration: 1500 });
     }
   }
-
 }
