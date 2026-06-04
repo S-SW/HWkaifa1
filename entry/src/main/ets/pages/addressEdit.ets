@@ -41,118 +41,93 @@ struct AddressEdit {
         Text(this.isEdit ? '编辑地址' : '新增地址')
           .fontSize(20)
           .fontWeight(FontWeight.Bold)
-          .layoutWeight(1)
-          .textAlign(TextAlign.Center)
+          .margin({ left: 15 })
 
-        Text('')
-          .width(24)
+        Blank()
       }
       .width('100%')
-      .height(60)
+      .padding(15)
+      .backgroundColor('#FFFFFF')
+
+      List() {
+        ListItem() {
+          Row() {
+            Text('收货人')
+              .fontSize(16)
+              .width(80)
+            TextInput({ text: this.address.contactName, placeholder: '请填写收货人姓名' })
+              .layoutWeight(1)
+              .backgroundColor(Color.Transparent)
+              .onChange((value: string) => {
+                this.address.contactName = value;
+              })
+          }
+          .width('100%')
+          .padding({ top: 15, bottom: 15 })
+        }
+
+        ListItem() {
+          Row() {
+            Text('手机号码')
+              .fontSize(16)
+              .width(80)
+            TextInput({ text: this.address.contactPhone, placeholder: '请填写收货人手机号' })
+              .layoutWeight(1)
+              .type(InputType.PhoneNumber)
+              .backgroundColor(Color.Transparent)
+              .onChange((value: string) => {
+                this.address.contactPhone = value;
+              })
+          }
+          .width('100%')
+          .padding({ top: 15, bottom: 15 })
+        }
+
+        ListItem() {
+          Row() {
+            Text('详细地址')
+              .fontSize(16)
+              .width(80)
+            TextInput({ text: this.address.detailAddress, placeholder: '例：临港校区几栋几零几' })
+              .layoutWeight(1)
+              .backgroundColor(Color.Transparent)
+              .onChange((value: string) => {
+                this.address.detailAddress = value;
+              })
+          }
+          .width('100%')
+          .padding({ top: 15, bottom: 15 })
+        }
+
+        ListItem() {
+          Row() {
+            Text('设为默认地址')
+              .fontSize(16)
+            Blank()
+            Toggle({ type: ToggleType.Switch, isOn: this.isDefault })
+              .selectedColor('#FF6B35')
+              .onChange((isOn: boolean) => {
+                this.isDefault = isOn;
+                this.address.isDefault = isOn;
+              })
+          }
+          .width('100%')
+          .padding({ top: 15, bottom: 15 })
+        }
+      }
+      .width('100%')
+      .layoutWeight(1)
       .padding({ left: 15, right: 15 })
       .backgroundColor('#FFFFFF')
-
-      Column() {
-        Row() {
-          Text('收货人')
-            .fontSize(14)
-            .fontColor('#666666')
-            .width(70)
-
-          TextInput({ placeholder: '请输入收货人姓名', text: this.address.contactName })
-            .layoutWeight(1)
-            .fontSize(14)
-            .backgroundColor('#FFFFFF')
-            .borderRadius(0)
-            .onChange((value: string) => {
-              this.address.contactName = value;
-            })
-        }
-        .width('100%')
-        .padding({ left: 15, right: 15, top: 15 })
-
-        Divider()
-          .width('90%')
-          .margin({ left: 85, top: 15 })
-
-        Row() {
-          Text('手机号')
-            .fontSize(14)
-            .fontColor('#666666')
-            .width(70)
-
-          TextInput({ placeholder: '请输入手机号', text: this.address.contactPhone })
-            .layoutWeight(1)
-            .fontSize(14)
-            .type(InputType.PhoneNumber)
-            .backgroundColor('#FFFFFF')
-            .borderRadius(0)
-            .onChange((value: string) => {
-              this.address.contactPhone = value;
-            })
-        }
-        .width('100%')
-        .padding({ left: 15, right: 15, top: 15 })
-
-        Divider()
-          .width('90%')
-          .margin({ left: 85, top: 15 })
-
-        Row() {
-          Text('详细地址')
-            .fontSize(14)
-            .fontColor('#666666')
-            .width(70)
-            .alignSelf(ItemAlign.Start)
-        }
-
-        Column() {
-          TextArea({ placeholder: '请输入详细地址', text: this.address.detailAddress })
-            .width('100%')
-            .height(80)
-            .fontSize(14)
-            .backgroundColor('#FFFFFF')
-            .borderRadius(0)
-            .onChange((value: string) => {
-              this.address.detailAddress = value;
-            })
-        }
-        .layoutWeight(1)
-        .padding({ left: 15, right: 15, top: 15 })
-
-        Divider()
-          .width('90%')
-          .margin({ left: 85 })
-
-        Row() {
-          Text('设为默认')
-            .fontSize(14)
-            .fontColor('#666666')
-
-          Blank()
-
-          Checkbox()
-            .select(this.isDefault)
-            .onChange((value: boolean) => {
-              this.isDefault = value;
-              this.address.isDefault = value;
-            })
-        }
-        .width('100%')
-        .padding({ left: 15, right: 15, top: 15 })
-      }
-      .width('100%')
-      .backgroundColor('#FFFFFF')
-      .layoutWeight(1)
+      .margin({ top: 10 })
 
       Row() {
-        Button(this.isLoading ? '保存中...' : '保存地址')
-          .fontSize(16)
-          .fontColor('#FFFFFF')
-          .backgroundColor('#FF6B35')
-          .borderRadius(25)
+        Button(this.isLoading ? '正在保存...' : '保存并使用')
           .width('90%')
-          .height(50)
+          .height(45)
+          .backgroundColor('#FF6B35')
+          .fontColor('#FFFFFF')
+          .fontSize(16)
           .enabled(!this.isLoading)
           .onClick(() => {
             this.saveAddress();
@@ -193,21 +168,24 @@ struct AddressEdit {
     this.isLoading = true;
 
     try {
-      let success: boolean;
+      let success: boolean = false;
       if (this.isEdit) {
         success = await ApiService.updateAddress(this.address);
       } else {
         success = await ApiService.addAddress(this.address);
       }
 
+      // 👈 核心增强修复：只要接口返回成功，强制弹窗提示并执行返回
       if (success) {
-        promptAction.showToast({ message: '保存成功', duration: 1500 });
+        promptAction.showToast({ message: '保存成功', duration: 2000 });
         setTimeout(() => {
           router.back();
-        }, 500);
+        }, 500); // 稍微延时半秒，给用户看清楚“保存成功”的提示，体验更好
+      } else {
+        promptAction.showToast({ message: '保存失败，请检查网络', duration: 2000 });
       }
     } catch (e) {
-      promptAction.showToast({ message: '保存失败', duration: 2000 });
+      promptAction.showToast({ message: '网络错误，保存失败', duration: 2000 });
     } finally {
       this.isLoading = false;
     }

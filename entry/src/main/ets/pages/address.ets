@@ -17,6 +17,14 @@ struct Address {
     }
   }
 
+  // 👈 核心新增功能：每次从新增/编辑页 router.back() 返回到这个界面时，本方法会被自动触发
+  async onPageShow() {
+    const hasAuth = await AuthGuard.checkAuthAndRedirect('pages/address');
+    if (hasAuth) {
+      this.loadAddresses(); // 强制重新向后端请求最新加入的数据，完成自动刷新
+    }
+  }
+
   async loadAddresses() {
     this.isLoading = true;
     try {
@@ -45,53 +53,51 @@ struct Address {
           .textAlign(TextAlign.Center)
 
         Text('新增')
-          .fontSize(14)
+          .fontSize(16)
           .fontColor('#FF6B35')
           .onClick(() => {
             router.pushUrl({ url: 'pages/addressEdit' });
           })
       }
       .width('100%')
-      .height(60)
-      .padding({ left: 15, right: 15 })
+      .padding(15)
       .backgroundColor('#FFFFFF')
 
       if (this.isLoading) {
-        Blank()
-        LoadingProgress()
-          .width(40)
-          .height(40)
-      } else if (this.addresses.length === 0) {
-        Blank()
         Column() {
-          Image($r('app.media.icon'))
-            .width(80)
-            .height(80)
-            .opacity(0.5)
-
-          Text('暂无地址')
-            .fontSize(16)
-            .fontColor('#999999')
-            .margin({ top: 20 })
-
-          Text('点击右上角添加新地址')
+          LoadingProgress()
+            .width(50)
+            .height(50)
+            .color('#FF6B35')
+          Text('正在加载地址...')
             .fontSize(14)
-            .fontColor('#CCCCCC')
+            .fontColor('#999999')
             .margin({ top: 10 })
         }
-      } else {
-        Scroll() {
-          Column() {
-            ForEach(this.addresses, (address: AddressModel) => {
-              this.AddressCard(address)
-            })
-          }
-          .padding(15)
-        }
-        .align(Alignment.Top)
-        .scrollable(ScrollDirection.Vertical)
-        .scrollBar(BarState.Off)
+        .width('100%')
         .layoutWeight(1)
+        .justifyContent(FlexAlign.Center)
+      } else if (this.addresses.length === 0) {
+        Column() {
+          Text('暂无收货地址')
+            .fontSize(16)
+            .fontColor('#999999')
+        }
+        .width('100%')
+        .layoutWeight(1)
+        .justifyContent(FlexAlign.Center)
+      } else {
+        List({ space: 10 }) {
+          ForEach(this.addresses, (address: AddressModel) => {
+            ListItem() {
+              this.AddressCard(address)
+            }
+          })
+        }
+        .width('100%')
+        .layoutWeight(1)
+        .padding({ left: 15, right: 15, top: 10, bottom: 10 })
+        .edgeEffect(EdgeEffect.Spring)
       }
     }
     .width('100%')
@@ -103,67 +109,51 @@ struct Address {
   AddressCard(address: AddressModel) {
     Column() {
       Row() {
-        Column() {
-          Text(address.contactName)
-            .fontSize(16)
-            .fontWeight(FontWeight.Medium)
-            .fontColor('#333333')
+        Text(address.contactName)
+          .fontSize(16)
+          .fontWeight(FontWeight.Bold)
+          .fontColor('#333333')
 
-          Text(address.contactPhone)
-            .fontSize(14)
-            .fontColor('#666666')
-            .margin({ top: 5 })
+        Text(address.contactPhone)
+          .fontSize(14)
+          .fontColor('#666666')
+          .margin({ left: 15 })
 
-          Text(address.detailAddress)
-            .fontSize(14)
-            .fontColor('#999999')
-            .margin({ top: 5 })
-            .maxLines(2)
-            .textOverflow({ overflow: TextOverflow.Ellipsis })
-        }
-        .layoutWeight(1)
-        .alignItems(HorizontalAlign.Start)
-
-        Column() {
-          if (address.isDefault) {
-            Text('默认')
-              .fontSize(12)
-              .fontColor('#FFFFFF')
-              .backgroundColor('#FF6B35')
-              .borderRadius(10)
-              .padding({ left: 10, right: 10, top: 3, bottom: 3 })
-          }
-
-          Row() {
-            Image($r('app.media.icon'))
-              .width(20)
-              .height(20)
-              .fillColor('#FF6B35')
-              .onClick(() => {
-                this.editAddress(address);
-              })
-
-            Image($r('app.media.icon'))
-              .width(20)
-              .height(20)
-              .fillColor('#F44336')
-              .margin({ left: 15 })
-              .onClick(() => {
-                this.deleteAddress(address);
-              })
-          }
-          .margin({ top: 10 })
+        if (address.isDefault) {
+          Text('默认')
+            .fontSize(10)
+            .fontColor('#FFFFFF')
+            .backgroundColor('#FF6B35')
+            .padding({ left: 5, right: 5, top: 2, bottom: 2 })
+            .borderRadius(3)
+            .margin({ left: 10 })
         }
       }
       .width('100%')
-      .padding(15)
+      .padding({ left: 15, right: 15, top: 15, bottom: 5 })
 
-      if (!address.isDefault) {
+      Row() {
+        Text(address.detailAddress)
+          .fontSize(14)
+          .fontColor('#333333')
+          .maxLines(2)
+          .textOverflow({ overflow: TextOverflow.Ellipsis })
+      }
+      .width('100%')
+      .padding({ left: 15, right: 15, bottom: 15 })
+
+      Divider()
+        .color('#EEEEEE')
+        .strokeWidth(1)
+        .margin({ left: 15, right: 15 })
+
+      Row() {
         Row() {
-          Checkbox()
-            .select(address.isDefault)
-            .onChange((isSelected: boolean) => {
-              if (isSelected) {
+          Image(address.isDefault ? $r('app.media.icon') : $r('app.media.icon')) // 使用你的单选图标资源代替
+            .width(16)
+            .height(16)
+            .onClick(() => {
+              if (!address.isDefault) {
                 this.setDefaultAddress(address);
               }
             })
@@ -173,7 +163,25 @@ struct Address {
             .fontColor('#666666')
             .margin({ left: 8 })
         }
-        .width('100%')
+
+        Blank()
+
+        Row() {
+          Text('编辑')
+            .fontSize(12)
+            .fontColor('#666666')
+            .onClick(() => {
+              this.editAddress(address);
+            })
+
+          Text('删除')
+            .fontSize(12)
+            .fontColor('#FF3B30')
+            .margin({ left: 20 })
+            .onClick(() => {
+              this.deleteAddress(address);
+            })
+        }
         .padding({ left: 15, right: 15, bottom: 15 })
       }
     }
@@ -186,7 +194,7 @@ struct Address {
   editAddress(address: AddressModel) {
     router.pushUrl({
       url: 'pages/addressEdit',
-      params: { address: address }
+      params: { address: JSON.stringify(address) } // 序列化传输更安全稳定
     });
   }
 
@@ -210,12 +218,8 @@ struct Address {
       address.isDefault = true;
       let success = await ApiService.updateAddress(address);
       if (success) {
-        this.addresses.forEach(a => {
-          if (a.id !== address.id) {
-            a.isDefault = false;
-          }
-        });
-        promptAction.showToast({ message: '设置成功', duration: 1500 });
+        promptAction.showToast({ message: '设置默认地址成功', duration: 1500 });
+        this.loadAddresses();
       }
     } catch (e) {
       promptAction.showToast({ message: '设置失败', duration: 1500 });

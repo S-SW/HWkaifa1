@@ -1,6 +1,8 @@
 import http from '@ohos.net.http';
 import hilog from '@ohos.hilog';
 import { Dish, CartItem, Order, User, Address, Banner } from '../model/Entities';
+// 确保引入了你用来存取 Token 的 AppStorage 工具类
+import AppStorage from '../utils/AppStorage';
 
 const BASE_URL = 'http://10.13.30.132:8080';
 const TIMEOUT = 30000;
@@ -37,8 +39,8 @@ interface AddressRequest {
   userId?: number;
   contactName: string;
   contactPhone: string;
-  address: string;
-  isDefault: boolean;
+  detailAddress: string;
+  isDefault: boolean | number; // 👈 扩充类型，兼容后端可能的 Integer 0/1 或 Boolean 映射
 }
 
 interface OrderCreateRequest {
@@ -75,6 +77,18 @@ export class ApiService {
 
   private async request<T>(method: http.RequestMethod, url: string, data?: Object): Promise<T> {
     let httpRequest = this.createHttp();
+
+    // 👇 核心修复：重新开软件时内存中 this.token 为空，主动从本地持久化缓存捞取 Token 补上
+    if (!this.token) {
+      try {
+        let savedToken = await AppStorage.getToken();
+        if (savedToken) {
+          this.token = savedToken;
+        }
+      } catch (e) {
+        hilog.error(0x0000, TAG, '从AppStorage恢复Token失败: %{public}s', JSON.stringify(e));
+      }
+    }
 
     let header: HttpHeader = {
       'Content-Type': 'application/json',
@@ -227,11 +241,13 @@ export class ApiService {
     let body: AddressRequest = {
       contactName: address.contactName,
       contactPhone: address.contactPhone,
-      address: address.detailAddress,
-      isDefault: address.isDefault
+      detailAddress: address.detailAddress, // 之前我们修正好的字段
+      isDefault: address.isDefault ? 1 : 0
     };
     let result = await this.post<ApiResponse<null>>('/address/add', body);
-    return result.code === 0 || result.success === true;
+
+    // 👈 核心修复：允许状态码为 0 或 200，或者 success 为 true 都算作成功
+    return result.code === 0 || result.code === 200 || result.success === true;
   }
 
   async updateAddress(address: Address): Promise<boolean> {
@@ -240,11 +256,13 @@ export class ApiService {
       userId: address.userId,
       contactName: address.contactName,
       contactPhone: address.contactPhone,
-      address: address.detailAddress,
-      isDefault: address.isDefault
+      detailAddress: address.detailAddress, // 之前我们修正好的字段
+      isDefault: address.isDefault ? 1 : 0
     };
     let result = await this.put<ApiResponse<null>>('/address/update', body);
-    return result.code === 0 || result.success === true;
+
+    // 👈 核心修复：允许状态码为 0 或 200，或者 success 为 true 都算作成功
+    return result.code === 0 || result.code === 200 || result.success === true;
   }
 
   async deleteAddress(id: number): Promise<boolean> {
