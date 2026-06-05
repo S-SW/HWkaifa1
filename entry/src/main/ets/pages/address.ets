@@ -159,7 +159,7 @@ struct Address {
       // 底部操作栏 - 修复排版对齐
       Row() {
         Row() {
-          Image(address.isDefault ? $r('app.media.icon') : $r('app.media.icon'))
+          Image(address.isDefault ? $r('app.media.pencil') : $r('app.media.mr'))
             .width(18)
             .height(18)
             .fillColor(address.isDefault ? '#409EFF' : '#CCCCCC') // 默认勾选高亮蓝色
